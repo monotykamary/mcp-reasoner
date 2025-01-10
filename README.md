@@ -1,18 +1,62 @@
 # MCP Reasoner
-A systematic reasoning MCP server implementation for Claude Desktop featuring both Beam Search and Monte Carlo Tree Search (MCTS) capabilities.
+A reasoning implementation for Claude Desktop that lets you use both Beam Search and Monte Carlo Tree Search (MCTS). tbh this started as a way to see if we could make Claude even better at complex problem-solving... turns out we definitely can.
+
+### Current Version:
+**v2.0.0**
+
+#### What's New:
+
+> Added 2 Experimental Reasoning Algorithms:
+>
+>     - `mcts-002-alpha`
+>
+>         - Uses the A* Search Method along with an early *alpha* implementation of a Policy Simulation Layer
+>
+>         - Also includes an early *alpha* implementation of Adaptive Exploration Simulator & Outcome Based Reasoning Simulator
+>
+>     *NOTE* the implementation of these alpha simulators is not complete and is subject to change
+>
+>     - `mcts-002alt-alpha`
+>
+>         - Uses the Bidirectional Search Method along with an early *alpha* implementation of a Policy Simulation Layer
+>
+>         - Also includes an early *alpha* implementation of Adaptive Exploration Simulator & Outcome Based Reasoning Simulator
+>
+>     *NOTE* the implementation of these alpha simulators is not complete and is subject to change
+
+
+What happened to `mcts-001-alpha` and `mcts-001alt-alpha`?
+> Quite simply: It was useless and near similar to the base `mcts` method. After initial testing the results yielded in basic thought processes was near similar showing that simply adding policy simulation may not have an effect.
+
+So why add Polciy Simulation Layer now?
+> Well i think its important to incorporate Policy AND Search in tandem as that is how most of the algorithms implement them.
+
+#### Previous Versions:
+**v1.1.0**
+
+> Added model control over search parameters:
+>
+> beamWidth - lets Claude adjust how many paths to track (1-10)
+>
+> numSimulations - fine-tune MCTS simulation count (1-150)
 
 ## Features
-* Dual search strategies:
-   * Beam search with configurable width
-   * MCTS for complex decision spaces
-* Thought scoring and evaluation
-* Tree-based reasoning paths
-* Statistical analysis of reasoning process
-* MCP protocol compliance
+- Two search strategies that you can switch between:
+   - Beam search (good for straightforward stuff)
+   - MCTS (when stuff gets complex) with alpha variations (see above)
+- Tracks how good different reasoning paths are
+- Maps out all the different ways Claude thinks through problems
+- Analyzes how the reasoning process went
+- Follows the MCP protocol (obviously)
 
 ## Installation
 ```
+git clone https://github.com/frgmt0/mcp-reasoner.git 
+
+OR clone the original:
+
 git clone https://github.com/Jacck/mcp-reasoner.git
+
 cd mcp-reasoner
 npm install
 npm run build
@@ -31,46 +75,23 @@ Add to Claude Desktop config:
 }
 ```
 
-## Search Strategies
+## Testing
 
-### Beam Search
-* Maintains fixed-width set of most promising paths
-* Optimal for step-by-step reasoning
-* Best for: Mathematical problems, logical puzzles
+[More Testing Coming Soon]
 
-### Monte Carlo Tree Search
-* Simulation-based exploration of decision space
-* Balances exploration and exploitation
-* Best for: Complex problems with uncertain outcomes
+## Benchmarks
 
-**Note:** Monte Carlo Tree Search allowed Claude to perform really well on the Arc AGI benchmark (scored 6/10 on the public test), whereas beam search yielded a (3/10) on the same puzzles. For super complex tasks, you'd want to direct Claude to utilize the MCTS strategy over the beam search.
+[Benchmarking will be added soon]
 
-## Algorithm Details
-1. Search Strategy Selection
-   * Beam Search: Evaluates and ranks multiple solution paths
-   * MCTS: Uses UCT for node selection and random rollouts
-2. Thought Scoring Based On:
-   * Detail level
-   * Mathematical expressions
-   * Logical connectors
-   * Parent-child relationship strength
-3. Process Management
-   * Tree-based state tracking
-   * Statistical analysis of reasoning
-   * Progress monitoring
+Key Benchmarks to test against:
 
-## Use Cases
-* Mathematical problems
-* Logical puzzles
-* Step-by-step analysis
-* Complex problem decomposition
-* Decision tree exploration
-* Strategy optimization
+- MATH500
 
-## Future Implementations
-* Implement New Algorithms
-   * Iterative Deepening Depth-First Search (IDDFS)
-   * Alpha-Beta Pruning
+- GPQA-Diamond
+
+- GMSK8
+
+- Maybe Polyglot &/or SWE-Bench
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

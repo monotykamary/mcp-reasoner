@@ -13,13 +13,25 @@ export class Reasoner {
     
     // Initialize available strategies
     this.strategies = new Map();
+    
+    // Initialize base strategies
     this.strategies.set(
       ReasoningStrategy.BEAM_SEARCH,
-      StrategyFactory.createStrategy(ReasoningStrategy.BEAM_SEARCH, this.stateManager)
+      StrategyFactory.createStrategy(ReasoningStrategy.BEAM_SEARCH, this.stateManager, CONFIG.beamWidth)
     );
     this.strategies.set(
       ReasoningStrategy.MCTS,
-      StrategyFactory.createStrategy(ReasoningStrategy.MCTS, this.stateManager)
+      StrategyFactory.createStrategy(ReasoningStrategy.MCTS, this.stateManager, undefined, CONFIG.numSimulations)
+    );
+    
+    // Initialize experimental MCTS strategies
+    this.strategies.set(
+      ReasoningStrategy.MCTS_002_ALPHA,
+      StrategyFactory.createStrategy(ReasoningStrategy.MCTS_002_ALPHA, this.stateManager, undefined, CONFIG.numSimulations)
+    );
+    this.strategies.set(
+      ReasoningStrategy.MCTS_002_ALT_ALPHA,
+      StrategyFactory.createStrategy(ReasoningStrategy.MCTS_002_ALT_ALPHA, this.stateManager, undefined, CONFIG.numSimulations)
     );
 
     // Set default strategy
@@ -31,7 +43,26 @@ export class Reasoner {
   public async processThought(request: ReasoningRequest): Promise<ReasoningResponse> {
     // Switch strategy if requested
     if (request.strategyType && this.strategies.has(request.strategyType as ReasoningStrategy)) {
-      this.currentStrategy = this.strategies.get(request.strategyType as ReasoningStrategy)!;
+      const strategyType = request.strategyType as ReasoningStrategy;
+      
+      // Create new strategy instance with appropriate parameters
+      if (strategyType === ReasoningStrategy.BEAM_SEARCH) {
+        this.currentStrategy = StrategyFactory.createStrategy(
+          strategyType,
+          this.stateManager,
+          request.beamWidth
+        );
+      } else {
+        // All MCTS variants (base and experimental) use numSimulations
+        this.currentStrategy = StrategyFactory.createStrategy(
+          strategyType,
+          this.stateManager,
+          undefined,
+          request.numSimulations
+        );
+      }
+      // Update strategy in map
+      this.strategies.set(strategyType, this.currentStrategy);
     }
 
     // Process thought using current strategy
@@ -109,11 +140,19 @@ export class Reasoner {
     }
   }
 
-  public setStrategy(strategyType: ReasoningStrategy): void {
+  public setStrategy(strategyType: ReasoningStrategy, beamWidth?: number, numSimulations?: number): void {
     if (!this.strategies.has(strategyType)) {
       throw new Error(`Unknown strategy type: ${strategyType}`);
     }
-    this.currentStrategy = this.strategies.get(strategyType)!;
+    // Create new strategy instance with appropriate parameters
+    if (strategyType === ReasoningStrategy.BEAM_SEARCH) {
+      this.currentStrategy = StrategyFactory.createStrategy(strategyType, this.stateManager, beamWidth);
+    } else {
+      // All MCTS variants (base and experimental) use numSimulations
+      this.currentStrategy = StrategyFactory.createStrategy(strategyType, this.stateManager, undefined, numSimulations);
+    }
+    // Update strategy in map
+    this.strategies.set(strategyType, this.currentStrategy);
   }
 
   public getAvailableStrategies(): ReasoningStrategy[] {
